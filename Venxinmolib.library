@@ -4,7 +4,12 @@ local UserInputService = game:GetService("UserInputService")
 
 local Library = {}
 
-function Library:CreateWindow(titleText)
+function Library:CreateWindow(config)
+    config = config or {}
+    local titleText = config.Title or "Dynamic Menu"
+    local enableLoading = config.Loading or false -- Mặc định là không bật, người dùng thích thì bật true
+    local loadingTime = config.LoadingTime or 6  -- Thời gian chờ loading tùy chỉnh
+
     if CoreGui:FindFirstChild("CustomDynamicMenu") then
         CoreGui.CustomDynamicMenu:Destroy()
     end
@@ -32,12 +37,68 @@ function Library:CreateWindow(titleText)
         end)
     end
 
+    local OpenButton = Instance.new("Frame", ScreenGui)
+    OpenButton.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    OpenButton.BorderSizePixel = 0
+    OpenButton.Position = UDim2.new(0.5, -90, 0.05, 0)
+    OpenButton.Size = UDim2.new(0, 180, 0, 36)
+    OpenButton.Visible = false
+    Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 6)
+    Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(60, 60, 60)
+
+    local DragPart = Instance.new("Frame", OpenButton)
+    DragPart.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    DragPart.Size = UDim2.new(0, 40, 1, 0)
+    Instance.new("UICorner", DragPart).CornerRadius = UDim.new(0, 6)
+    MakeDraggable(DragPart, OpenButton)
+
+    local ClickPart = Instance.new("TextButton", OpenButton)
+    ClickPart.BackgroundTransparency = 1
+    ClickPart.Position = UDim2.new(0, 40, 0, 0)
+    ClickPart.Size = UDim2.new(1, -40, 1, 0)
+    ClickPart.Font = Enum.Font.GothamBold
+    ClickPart.Text = "  Open Menu"
+    ClickPart.TextColor3 = Color3.fromRGB(200, 200, 200)
+    ClickPart.TextSize = 13
+    ClickPart.TextXAlignment = Enum.TextXAlignment.Left
+
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
     MainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
     MainFrame.Size = UDim2.new(0, 500, 0, 350)
+    MainFrame.Visible = not enableLoading -- Nếu không bật loading thì hiện luôn
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
     Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(50, 50, 50)
+
+    -- Xử lý phần tùy chọn Loading
+    if enableLoading then
+        local LoadingFrame = Instance.new("Frame", ScreenGui)
+        LoadingFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+        LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -40)
+        LoadingFrame.Size = UDim2.new(0, 300, 0, 80)
+        LoadingFrame.Visible = true
+        Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 8)
+        Instance.new("UIStroke", LoadingFrame).Color = Color3.fromRGB(60, 60, 60)
+
+        local LoadingText = Instance.new("TextLabel", LoadingFrame)
+        LoadingText.Size = UDim2.new(1, 0, 1, 0)
+        LoadingText.BackgroundTransparency = 1
+        LoadingText.Text = "Menu loading..."
+        LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        LoadingText.TextSize = 14
+        LoadingText.Font = Enum.Font.GothamBold
+
+        task.spawn(function()
+            task.wait(loadingTime)
+            if LoadingFrame then
+                LoadingFrame:Destroy()
+            end
+            task.wait(2)
+            if MainFrame then
+                MainFrame.Visible = true
+            end
+        end)
+    end
 
     local TopBar = Instance.new("Frame", MainFrame)
     TopBar.Size = UDim2.new(1, 0, 0, 38)
@@ -47,14 +108,16 @@ function Library:CreateWindow(titleText)
     Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 8)
     MakeDraggable(TopBar, MainFrame)
 
-    local CloseMenuButton = Instance.new("TextButton", TopBar)
-    CloseMenuButton.Size = UDim2.new(0, 28, 0, 28)
-    CloseMenuButton.Position = UDim2.new(1, -36, 0, 5)
-    CloseMenuButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    CloseMenuButton.Text = "X"
-    CloseMenuButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    CloseMenuButton.ZIndex = 2
-    Instance.new("UICorner", CloseMenuButton).CornerRadius = UDim.new(0, 5)
+    local TitleLabel = Instance.new("TextLabel", TopBar)
+    TitleLabel.Size = UDim2.new(1, -80, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 12, 0, 0)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = titleText
+    TitleLabel.TextColor3 = Color3.fromRGB(210, 210, 210)
+    TitleLabel.TextSize = 13
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.ZIndex = 2
 
     local ToggleMenuButton = Instance.new("TextButton", TopBar)
     ToggleMenuButton.Size = UDim2.new(0, 28, 0, 28)
@@ -65,21 +128,14 @@ function Library:CreateWindow(titleText)
     ToggleMenuButton.ZIndex = 2
     Instance.new("UICorner", ToggleMenuButton).CornerRadius = UDim.new(0, 5)
 
-    local TitleLabel = Instance.new("TextLabel", TopBar)
-    TitleLabel.Size = UDim2.new(1, -80, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 12, 0, 0)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = titleText or "Dynamic Menu"
-    TitleLabel.TextColor3 = Color3.fromRGB(210, 210, 210)
-    TitleLabel.TextSize = 13
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.ZIndex = 2
-
-    -- Tính toán chiều rộng tối ưu khi thu nhỏ dựa vào độ dài chữ tiêu đề
-    local textService = game:GetService("TextService")
-    local textSize = textService:GetTextSize(TitleLabel.Text, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(1000, 38))
-    local minimizedWidth = math.clamp(textSize.X + 90, 200, 500) -- Tự dãn rộng theo chữ, nhỏ nhất là 200
+    local CloseMenuButton = Instance.new("TextButton", TopBar)
+    CloseMenuButton.Size = UDim2.new(0, 28, 0, 28)
+    CloseMenuButton.Position = UDim2.new(1, -36, 0, 5)
+    CloseMenuButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    CloseMenuButton.Text = "X"
+    CloseMenuButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    CloseMenuButton.ZIndex = 2
+    Instance.new("UICorner", CloseMenuButton).CornerRadius = UDim.new(0, 5)
 
     local ContainerHolder = Instance.new("Frame", MainFrame)
     ContainerHolder.Size = UDim2.new(1, 0, 1, -38)
@@ -87,7 +143,8 @@ function Library:CreateWindow(titleText)
     ContainerHolder.BackgroundTransparency = 1
     ContainerHolder.ClipsDescendants = true
 
-    CloseMenuButton.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+    CloseMenuButton.MouseButton1Click:Connect(function() ScreenGui:Destroy() OpenButton.Visible = true end)
+    ClickPart.MouseButton1Click:Connect(function() OpenButton.Visible = false MainFrame.Visible = true end)
 
     local menuVisible = true
     ToggleMenuButton.MouseButton1Click:Connect(function()
@@ -96,8 +153,7 @@ function Library:CreateWindow(titleText)
             ContainerHolder.Visible = true
             TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 500, 0, 350)}):Play()
         else
-            -- Co lại vừa khít với độ dài của tên tiêu đề, không sợ bị đè chữ nữa
-            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, minimizedWidth, 0, 38)}):Play()
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 200, 0, 38)}):Play()
             task.wait(0.25)
             if not menuVisible then
                 ContainerHolder.Visible = false
@@ -226,7 +282,7 @@ function Library:CreateWindow(titleText)
             btnComp.Font = Enum.Font.GothamBold
             Instance.new("UICorner", btnComp).CornerRadius = UDim.new(0, 6)
             
-            btnComp.MouseButton1Click:Connect(function)
+            btnComp.MouseButton1Click:Connect(function()
                 pcall(function() callback() end)
             end)
         end
@@ -261,6 +317,83 @@ function Library:CreateWindow(titleText)
             
             textBox.FocusLost:Connect(function(enterPressed)
                 pcall(function() callback(textBox.Text, enterPressed) end)
+            end)
+        end
+
+        function TabObj:AddDropdown(text, list, callback)
+            local frame = Instance.new("Frame", scrollingFrame)
+            frame.Size = UDim2.new(1, 0, 0, 36)
+            frame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+            frame.ClipsDescendants = true
+            Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+            
+            local label = Instance.new("TextLabel", frame)
+            label.Size = UDim2.new(1, -40, 0, 36)
+            label.Position = UDim2.new(0, 10, 0, 0)
+            label.BackgroundTransparency = 1
+            label.Text = text .. " (Chọn)"
+            label.TextColor3 = Color3.fromRGB(200, 200, 200)
+            label.TextSize = 12
+            label.Font = Enum.Font.Gotham
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            
+            local arrow = Instance.new("TextLabel", frame)
+            arrow.Size = UDim2.new(0, 30, 0, 36)
+            arrow.Position = UDim2.new(1, -35, 0, 0)
+            arrow.BackgroundTransparency = 1
+            arrow.Text = "▼"
+            arrow.TextColor3 = Color3.fromRGB(200, 200, 200)
+            arrow.TextSize = 10
+            
+            local listHolder = Instance.new("ScrollingFrame", frame)
+            listHolder.Size = UDim2.new(1, -16, 0, 0)
+            listHolder.Position = UDim2.new(0, 8, 0, 38)
+            listHolder.BackgroundTransparency = 1
+            listHolder.ScrollBarThickness = 2
+            
+            local listLayout = Instance.new("UIListLayout", listHolder)
+            listLayout.Padding = UDim.new(0, 4)
+            
+            local open = false
+            local normalHeight = 36
+            local itemHeight = 28
+            
+            for _, v in ipairs(list or {}) do
+                local itemBtn = Instance.new("TextButton", listHolder)
+                itemBtn.Size = UDim2.new(1, 0, 0, itemHeight)
+                itemBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                itemBtn.Text = tostring(v)
+                itemBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+                itemBtn.TextSize = 11
+                itemBtn.Font = Enum.Font.Gotham
+                Instance.new("UICorner", itemBtn).CornerRadius = UDim.new(0, 4)
+                
+                itemBtn.MouseButton1Click:Connect(function()
+                    label.Text = text .. ": " .. tostring(v)
+                    open = false
+                    TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, normalHeight)}):Play()
+                    TweenService:Create(listHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, -16, 0, 0)}):Play()
+                    arrow.Text = "▼"
+                    pcall(function() callback(v) end)
+                end)
+            end
+            
+            listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                listHolder.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
+            end)
+            
+            local dropBtn = Instance.new("TextButton", frame)
+            dropBtn.Size = UDim2.new(1, 0, 0, 36)
+            dropBtn.BackgroundTransparency = 1
+            dropBtn.Text = ""
+            
+            dropBtn.MouseButton1Click:Connect(function()
+                open = not open
+                local contentH = math.clamp(#list * (itemHeight + 4) + 8, 0, 120)
+                local targetSize = open and (normalHeight + contentH + 6) or normalHeight
+                TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, targetSize)}):Play()
+                TweenService:Create(listHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, -16, 0, open and contentH or 0)}):Play()
+                arrow.Text = open and "▲" or "▼"
             end)
         end
 
