@@ -32,31 +32,6 @@ function Library:CreateWindow(titleText)
         end)
     end
 
-    local OpenButton = Instance.new("Frame", ScreenGui)
-    OpenButton.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-    OpenButton.BorderSizePixel = 0
-    OpenButton.Position = UDim2.new(0.5, -90, 0.05, 0)
-    OpenButton.Size = UDim2.new(0, 180, 0, 36)
-    OpenButton.Visible = false
-    Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", OpenButton).Color = Color3.fromRGB(60, 60, 60)
-
-    local DragPart = Instance.new("Frame", OpenButton)
-    DragPart.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    DragPart.Size = UDim2.new(0, 40, 1, 0)
-    Instance.new("UICorner", DragPart).CornerRadius = UDim.new(0, 6)
-    MakeDraggable(DragPart, OpenButton)
-
-    local ClickPart = Instance.new("TextButton", OpenButton)
-    ClickPart.BackgroundTransparency = 1
-    ClickPart.Position = UDim2.new(0, 40, 0, 0)
-    ClickPart.Size = UDim2.new(1, -40, 1, 0)
-    ClickPart.Font = Enum.Font.GothamBold
-    ClickPart.Text = "  Open Menu"
-    ClickPart.TextColor3 = Color3.fromRGB(200, 200, 200)
-    ClickPart.TextSize = 13
-    ClickPart.TextXAlignment = Enum.TextXAlignment.Left
-
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
     MainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
@@ -72,6 +47,24 @@ function Library:CreateWindow(titleText)
     Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 8)
     MakeDraggable(TopBar, MainFrame)
 
+    local CloseMenuButton = Instance.new("TextButton", TopBar)
+    CloseMenuButton.Size = UDim2.new(0, 28, 0, 28)
+    CloseMenuButton.Position = UDim2.new(1, -36, 0, 5)
+    CloseMenuButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    CloseMenuButton.Text = "X"
+    CloseMenuButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    CloseMenuButton.ZIndex = 2
+    Instance.new("UICorner", CloseMenuButton).CornerRadius = UDim.new(0, 5)
+
+    local ToggleMenuButton = Instance.new("TextButton", TopBar)
+    ToggleMenuButton.Size = UDim2.new(0, 28, 0, 28)
+    ToggleMenuButton.Position = UDim2.new(1, -68, 0, 5)
+    ToggleMenuButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    ToggleMenuButton.Text = "-"
+    ToggleMenuButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    ToggleMenuButton.ZIndex = 2
+    Instance.new("UICorner", ToggleMenuButton).CornerRadius = UDim.new(0, 5)
+
     local TitleLabel = Instance.new("TextLabel", TopBar)
     TitleLabel.Size = UDim2.new(1, -80, 1, 0)
     TitleLabel.Position = UDim2.new(0, 12, 0, 0)
@@ -83,23 +76,10 @@ function Library:CreateWindow(titleText)
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.ZIndex = 2
 
-    local ToggleMenuButton = Instance.new("TextButton", TopBar)
-    ToggleMenuButton.Size = UDim2.new(0, 28, 0, 28)
-    ToggleMenuButton.Position = UDim2.new(1, -68, 0, 5)
-    ToggleMenuButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    ToggleMenuButton.Text = "-"
-    ToggleMenuButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    ToggleMenuButton.ZIndex = 2
-    Instance.new("UICorner", ToggleMenuButton).CornerRadius = UDim.new(0, 5)
-
-    local CloseMenuButton = Instance.new("TextButton", TopBar)
-    CloseMenuButton.Size = UDim2.new(0, 28, 0, 28)
-    CloseMenuButton.Position = UDim2.new(1, -36, 0, 5)
-    CloseMenuButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    CloseMenuButton.Text = "X"
-    CloseMenuButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    CloseMenuButton.ZIndex = 2
-    Instance.new("UICorner", CloseMenuButton).CornerRadius = UDim.new(0, 5)
+    -- Tính toán chiều rộng tối ưu khi thu nhỏ dựa vào độ dài chữ tiêu đề
+    local textService = game:GetService("TextService")
+    local textSize = textService:GetTextSize(TitleLabel.Text, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(1000, 38))
+    local minimizedWidth = math.clamp(textSize.X + 90, 200, 500) -- Tự dãn rộng theo chữ, nhỏ nhất là 200
 
     local ContainerHolder = Instance.new("Frame", MainFrame)
     ContainerHolder.Size = UDim2.new(1, 0, 1, -38)
@@ -107,8 +87,7 @@ function Library:CreateWindow(titleText)
     ContainerHolder.BackgroundTransparency = 1
     ContainerHolder.ClipsDescendants = true
 
-    CloseMenuButton.MouseButton1Click:Connect(function() ScreenGui:Destroy() OpenButton.Visible = true end)
-    ClickPart.MouseButton1Click:Connect(function() OpenButton.Visible = false MainFrame.Visible = true end)
+    CloseMenuButton.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
     local menuVisible = true
     ToggleMenuButton.MouseButton1Click:Connect(function()
@@ -117,7 +96,8 @@ function Library:CreateWindow(titleText)
             ContainerHolder.Visible = true
             TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 500, 0, 350)}):Play()
         else
-            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 200, 0, 38)}):Play()
+            -- Co lại vừa khít với độ dài của tên tiêu đề, không sợ bị đè chữ nữa
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, minimizedWidth, 0, 38)}):Play()
             task.wait(0.25)
             if not menuVisible then
                 ContainerHolder.Visible = false
@@ -246,7 +226,7 @@ function Library:CreateWindow(titleText)
             btnComp.Font = Enum.Font.GothamBold
             Instance.new("UICorner", btnComp).CornerRadius = UDim.new(0, 6)
             
-            btnComp.MouseButton1Click:Connect(function()
+            btnComp.MouseButton1Click:Connect(function)
                 pcall(function() callback() end)
             end)
         end
