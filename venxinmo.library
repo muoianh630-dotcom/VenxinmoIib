@@ -123,7 +123,6 @@ function Library:CreateWindow(config)
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.ZIndex = 2
 
-    -- Nút Đóng menu (X)
     local CloseMenuButton = Instance.new("TextButton", TopBar)
     CloseMenuButton.Size = UDim2.new(0, 28, 0, 28)
     CloseMenuButton.Position = UDim2.new(1, -36, 0, 5)
@@ -133,7 +132,6 @@ function Library:CreateWindow(config)
     CloseMenuButton.ZIndex = 2
     Instance.new("UICorner", CloseMenuButton).CornerRadius = UDim.new(0, 5)
 
-    -- Nút Thu gọn / Mở rộng (-)
     local ToggleMenuButton = Instance.new("TextButton", TopBar)
     ToggleMenuButton.Size = UDim2.new(0, 28, 0, 28)
     ToggleMenuButton.Position = UDim2.new(1, -68, 0, 5)
@@ -159,7 +157,6 @@ function Library:CreateWindow(config)
         
         local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(2000, 38))
         local maxWidth = 520
-        -- Tăng khoảng cách an toàn lên 115 pixel để cụm nút bấm cách xa chữ cái cuối cùng một khoảng cực kỳ thoáng
         local calculatedWidth = textBounds.X + 115 
         local collapsedWidth = math.min(calculatedWidth, maxWidth)
         
