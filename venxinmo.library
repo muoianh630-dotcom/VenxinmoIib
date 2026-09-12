@@ -123,7 +123,7 @@ function Library:CreateWindow(config)
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.ZIndex = 2
 
-    -- Nút Đóng menu (X) - Đã căn lại vị trí sát phải
+    -- Nút Đóng menu (X)
     local CloseMenuButton = Instance.new("TextButton", TopBar)
     CloseMenuButton.Size = UDim2.new(0, 28, 0, 28)
     CloseMenuButton.Position = UDim2.new(1, -36, 0, 5)
@@ -158,8 +158,9 @@ function Library:CreateWindow(config)
         menuVisible = not menuVisible
         
         local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(2000, 38))
-        local maxWidth = 465
-        local calculatedWidth = textBounds.X + 80 
+        local maxWidth = 490
+        -- Cộng thêm hẳn 95 pixel để chừa khoảng trống thoải mái cho cụm 2 nút bấm ở góc phải
+        local calculatedWidth = textBounds.X + 95 
         local collapsedWidth = math.min(calculatedWidth, maxWidth)
         
         if menuVisible then
