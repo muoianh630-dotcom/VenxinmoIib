@@ -113,7 +113,7 @@ function Library:CreateWindow(config)
     MakeDraggable(TopBar, MainFrame)
 
     local TitleLabel = Instance.new("TextLabel", TopBar)
-    TitleLabel.Size = UDim2.new(1, -110, 1, 0)
+    TitleLabel.Size = UDim2.new(1, -80, 1, 0)
     TitleLabel.Position = UDim2.new(0, 12, 0, 0)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = titleText
@@ -123,6 +123,7 @@ function Library:CreateWindow(config)
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.ZIndex = 2
 
+    -- Nút Đóng menu (X) - Đã căn lại vị trí sát phải
     local CloseMenuButton = Instance.new("TextButton", TopBar)
     CloseMenuButton.Size = UDim2.new(0, 28, 0, 28)
     CloseMenuButton.Position = UDim2.new(1, -36, 0, 5)
@@ -132,20 +133,10 @@ function Library:CreateWindow(config)
     CloseMenuButton.ZIndex = 2
     Instance.new("UICorner", CloseMenuButton).CornerRadius = UDim.new(0, 5)
 
-    local MaximizeButton = Instance.new("TextButton", TopBar)
-    MaximizeButton.Size = UDim2.new(0, 28, 0, 28)
-    MaximizeButton.Position = UDim2.new(1, -68, 0, 5)
-    MaximizeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    MaximizeButton.Text = "⟷"
-    MaximizeButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    MaximizeButton.TextSize = 12
-    MaximizeButton.Font = Enum.Font.GothamBold
-    MaximizeButton.ZIndex = 2
-    Instance.new("UICorner", MaximizeButton).CornerRadius = UDim.new(0, 5)
-
+    -- Nút Thu gọn / Mở rộng (-)
     local ToggleMenuButton = Instance.new("TextButton", TopBar)
     ToggleMenuButton.Size = UDim2.new(0, 28, 0, 28)
-    ToggleMenuButton.Position = UDim2.new(1, -100, 0, 5)
+    ToggleMenuButton.Position = UDim2.new(1, -68, 0, 5)
     ToggleMenuButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     ToggleMenuButton.Text = "-"
     ToggleMenuButton.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -162,21 +153,18 @@ function Library:CreateWindow(config)
     ClickPart.MouseButton1Click:Connect(function() OpenButton.Visible = false MainFrame.Visible = true end)
 
     local menuVisible = true
-    local isMaximized = false
 
     ToggleMenuButton.MouseButton1Click:Connect(function()
         menuVisible = not menuVisible
         
         local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(2000, 38))
         local maxWidth = 465
-        local calculatedWidth = textBounds.X + 110 
+        local calculatedWidth = textBounds.X + 80 
         local collapsedWidth = math.min(calculatedWidth, maxWidth)
         
         if menuVisible then
             ContainerHolder.Visible = true
-            local targetW = isMaximized and 720 or 500
-            local targetH = isMaximized and 460 or 350
-            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, targetW, 0, targetH)}):Play()
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 500, 0, 350)}):Play()
         else
             TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, collapsedWidth, 0, 38)}):Play()
             task.wait(0.25)
@@ -185,20 +173,6 @@ function Library:CreateWindow(config)
             end
         end
         ToggleMenuButton.Text = menuVisible and "-" or "+"
-    end)
-
-    MaximizeButton.MouseButton1Click:Connect(function()
-        if not menuVisible then return end
-        isMaximized = not isMaximized
-
-        local targetWidth = isMaximized and 720 or 500
-        local targetHeight = isMaximized and 460 or 350
-
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, targetWidth, 0, targetHeight)
-        }):Play()
-
-        MaximizeButton.Text = isMaximized and "⤢" or "⟷"
     end)
 
     local TabBar = Instance.new("ScrollingFrame", ContainerHolder)
