@@ -158,9 +158,9 @@ function Library:CreateWindow(config)
         menuVisible = not menuVisible
         
         local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(2000, 38))
-        local maxWidth = 490
-        -- Cộng thêm hẳn 95 pixel để chừa khoảng trống thoải mái cho cụm 2 nút bấm ở góc phải
-        local calculatedWidth = textBounds.X + 95 
+        local maxWidth = 520
+        -- Tăng khoảng cách an toàn lên 115 pixel để cụm nút bấm cách xa chữ cái cuối cùng một khoảng cực kỳ thoáng
+        local calculatedWidth = textBounds.X + 115 
         local collapsedWidth = math.min(calculatedWidth, maxWidth)
         
         if menuVisible then
