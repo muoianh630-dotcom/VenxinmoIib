@@ -1,6 +1,7 @@
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
+local TextService = game:GetService("TextService")
 
 local Library = {}
 
@@ -148,11 +149,16 @@ function Library:CreateWindow(config)
     local menuVisible = true
     ToggleMenuButton.MouseButton1Click:Connect(function()
         menuVisible = not menuVisible
+        
+        -- Tự động tính toán chiều rộng khung thu gọn dựa vào độ dài tiêu đề
+        local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(1000, 38))
+        local collapsedWidth = math.clamp(textBounds.X + 80, 200, 480)
+        
         if menuVisible then
             ContainerHolder.Visible = true
             TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 500, 0, 350)}):Play()
         else
-            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 200, 0, 38)}):Play()
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, collapsedWidth, 0, 38)}):Play()
             task.wait(0.25)
             if not menuVisible then
                 ContainerHolder.Visible = false
@@ -356,7 +362,6 @@ function Library:CreateWindow(config)
             sliderFill.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
             Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
 
-            -- Mở rộng hitbox tàng hình lớn hơn xung quanh nút trượt để bám tay tốt hơn
             local sliderButton = Instance.new("TextButton", sliderBar)
             sliderButton.Size = UDim2.new(0, 28, 0, 28)
             sliderButton.Position = UDim2.new(0, -14, 0.5, -14)
