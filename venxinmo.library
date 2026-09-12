@@ -156,7 +156,8 @@ function Library:CreateWindow(config)
         
         local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(2000, 38))
         local maxWidth = 465
-        local calculatedWidth = textBounds.X + 80
+        -- Đã tăng thêm khoảng trống (cộng 110 thay vì 80 cũ) để khung co giãn thoải mái, không bị sát chữ
+        local calculatedWidth = textBounds.X + 110 
         local collapsedWidth = math.min(calculatedWidth, maxWidth)
         
         if menuVisible then
