@@ -157,7 +157,8 @@ function Library:CreateWindow(config)
         
         local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(2000, 38))
         local maxWidth = 520
-        local calculatedWidth = textBounds.X + 115 
+        -- Đã giảm khoảng cách an toàn xuống 85 pixel để khung thu gọn ôm sát chữ "Nam" hơn nhưng vẫn rất thoáng
+        local calculatedWidth = textBounds.X + 85 
         local collapsedWidth = math.min(calculatedWidth, maxWidth)
         
         if menuVisible then
