@@ -157,7 +157,6 @@ function Library:CreateWindow(config)
         
         local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(2000, 38))
         local maxWidth = 520
-        -- Đã giảm khoảng cách an toàn xuống 85 pixel để khung thu gọn ôm sát chữ "Nam" hơn nhưng vẫn rất thoáng
         local calculatedWidth = textBounds.X + 85 
         local collapsedWidth = math.min(calculatedWidth, maxWidth)
         
@@ -512,7 +511,7 @@ function Library:CreateWindow(config)
             Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
 
             local searchBox = Instance.new("TextBox", frame)
-            searchBox.Size = UDim2.new(1, -16, 0, 28)
+            searchBox.Size = UDim2.new(1, -45, 0, 28)
             searchBox.Position = UDim2.new(0, 8, 0, 4)
             searchBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
             searchBox.Text = ""
@@ -523,6 +522,15 @@ function Library:CreateWindow(config)
             searchBox.Font = Enum.Font.Gotham
             Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 4)
 
+            local arrowBtn = Instance.new("TextButton", frame)
+            arrowBtn.Size = UDim2.new(0, 30, 0, 28)
+            arrowBtn.Position = UDim2.new(1, -38, 0, 4)
+            arrowBtn.BackgroundTransparency = 1
+            arrowBtn.Text = "▼"
+            arrowBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+            arrowBtn.TextSize = 10
+            arrowBtn.Font = Enum.Font.GothamBold
+
             local listHolder = Instance.new("ScrollingFrame", frame)
             listHolder.Size = UDim2.new(1, -16, 0, 0)
             listHolder.Position = UDim2.new(0, 8, 0, 36)
@@ -531,6 +539,9 @@ function Library:CreateWindow(config)
 
             local listLayout = Instance.new("UIListLayout", listHolder)
             listLayout.Padding = UDim.new(0, 4)
+
+            local open = false
+            local normalHeight = 36
 
             local function updateItems(filter)
                 for _, child in ipairs(listHolder:GetChildren()) do
@@ -554,16 +565,23 @@ function Library:CreateWindow(config)
                         Instance.new("UICorner", itemBtn).CornerRadius = UDim.new(0, 4)
 
                         itemBtn.MouseButton1Click:Connect(function()
+                            searchBox.Text = strVal
+                            open = false
+                            arrowBtn.Text = "▼"
+                            TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, normalHeight)}):Play()
+                            TweenService:Create(listHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, -16, 0, 0)}):Play()
                             pcall(function() callback(strVal) end)
                         end)
                     end
                 end
 
                 listHolder.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
-                local contentH = math.clamp(count * 30, 0, 120)
-                local targetSize = 36 + contentH + 8
-                TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, targetSize)}):Play()
-                TweenService:Create(listHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, -16, 0, contentH)}):Play()
+                if open then
+                    local contentH = math.clamp(count * 30, 0, 120)
+                    local targetSize = normalHeight + contentH + 8
+                    TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, targetSize)}):Play()
+                    TweenService:Create(listHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, -16, 0, contentH)}):Play()
+                end
             end
 
             searchBox:GetPropertyChangedSignal("Text"):Connect(function()
@@ -571,7 +589,20 @@ function Library:CreateWindow(config)
             end)
 
             searchBox.Focused:Connect(function()
+                open = true
+                arrowBtn.Text = "▲"
                 updateItems(searchBox.Text)
+            end)
+
+            arrowBtn.MouseButton1Click:Connect(function()
+                open = not open
+                arrowBtn.Text = open and "▲" or "▼"
+                if open then
+                    updateItems(searchBox.Text)
+                else
+                    TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, normalHeight)}):Play()
+                    TweenService:Create(listHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, -16, 0, 0)}):Play()
+                end
             end)
         end
 
