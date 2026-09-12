@@ -7,7 +7,11 @@ local Library = {}
 
 function Library:CreateWindow(config)
     config = config or {}
-    local titleText = config.Title or "Dynamic Menu"
+    
+    local brandPrefix = "Venxinmo | "
+    local customTitle = config.Title or "Dynamic Menu"
+    local titleText = brandPrefix .. customTitle
+
     local enableLoading = config.Loading or false
     local loadingTime = config.LoadingTime or 6
 
@@ -150,9 +154,10 @@ function Library:CreateWindow(config)
     ToggleMenuButton.MouseButton1Click:Connect(function()
         menuVisible = not menuVisible
         
-        -- Tự động tính toán chiều rộng khung thu gọn dựa vào độ dài tiêu đề
-        local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(1000, 38))
-        local collapsedWidth = math.clamp(textBounds.X + 80, 200, 480)
+        local textBounds = TextService:GetTextSize(titleText, TitleLabel.TextSize, TitleLabel.Font, Vector2.new(2000, 38))
+        local maxWidth = 465
+        local calculatedWidth = textBounds.X + 80
+        local collapsedWidth = math.min(calculatedWidth, maxWidth)
         
         if menuVisible then
             ContainerHolder.Visible = true
