@@ -356,12 +356,18 @@ function Library:CreateWindow(config)
             sliderFill.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
             Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
 
+            -- Mở rộng hitbox tàng hình lớn hơn xung quanh nút trượt để bám tay tốt hơn
             local sliderButton = Instance.new("TextButton", sliderBar)
-            sliderButton.Size = UDim2.new(0, 14, 0, 14)
-            sliderButton.Position = UDim2.new(0, -7, 0.5, -7)
-            sliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            sliderButton.Size = UDim2.new(0, 28, 0, 28)
+            sliderButton.Position = UDim2.new(0, -14, 0.5, -14)
+            sliderButton.BackgroundTransparency = 1
             sliderButton.Text = ""
-            Instance.new("UICorner", sliderButton).CornerRadius = UDim.new(1, 0)
+
+            local visualKnob = Instance.new("Frame", sliderButton)
+            visualKnob.Size = UDim2.new(0, 14, 0, 14)
+            visualKnob.Position = UDim2.new(0.5, -7, 0.5, -7)
+            visualKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Instance.new("UICorner", visualKnob).CornerRadius = UDim.new(1, 0)
 
             min = min or 0
             max = max or 100
@@ -370,7 +376,7 @@ function Library:CreateWindow(config)
             local value = math.clamp(default, min, max)
             local percent = (value - min) / (max - min)
             sliderFill.Size = UDim2.new(percent, 0, 1, 0)
-            sliderButton.Position = UDim2.new(percent, -7, 0.5, -7)
+            sliderButton.Position = UDim2.new(percent, -14, 0.5, -14)
 
             local draggingSlider = false
 
@@ -378,7 +384,7 @@ function Library:CreateWindow(config)
                 local pos = math.clamp((input.Position.X - sliderBar.AbsolutePosition.X) / sliderBar.AbsoluteSize.X, 0, 1)
                 value = math.floor(min + ((max - min) * pos))
                 sliderFill.Size = UDim2.new(pos, 0, 1, 0)
-                sliderButton.Position = UDim2.new(pos, -7, 0.5, -7)
+                sliderButton.Position = UDim2.new(pos, -14, 0.5, -14)
                 valueLabel.Text = tostring(value)
                 pcall(function() callback(value) end)
             end
