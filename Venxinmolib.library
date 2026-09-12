@@ -7,8 +7,8 @@ local Library = {}
 function Library:CreateWindow(config)
     config = config or {}
     local titleText = config.Title or "Dynamic Menu"
-    local enableLoading = config.Loading or false -- Mặc định là không bật, người dùng thích thì bật true
-    local loadingTime = config.LoadingTime or 6  -- Thời gian chờ loading tùy chỉnh
+    local enableLoading = config.Loading or false
+    local loadingTime = config.LoadingTime or 6
 
     if CoreGui:FindFirstChild("CustomDynamicMenu") then
         CoreGui.CustomDynamicMenu:Destroy()
@@ -66,11 +66,10 @@ function Library:CreateWindow(config)
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
     MainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
     MainFrame.Size = UDim2.new(0, 500, 0, 350)
-    MainFrame.Visible = not enableLoading -- Nếu không bật loading thì hiện luôn
+    MainFrame.Visible = not enableLoading
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
     Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(50, 50, 50)
 
-    -- Xử lý phần tùy chọn Loading
     if enableLoading then
         local LoadingFrame = Instance.new("Frame", ScreenGui)
         LoadingFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
@@ -320,6 +319,96 @@ function Library:CreateWindow(config)
             end)
         end
 
+        function TabObj:AddSlider(text, min, max, default, callback)
+            local frame = Instance.new("Frame", scrollingFrame)
+            frame.Size = UDim2.new(1, 0, 0, 50)
+            frame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+            Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+
+            local label = Instance.new("TextLabel", frame)
+            label.Size = UDim2.new(1, -20, 0, 24)
+            label.Position = UDim2.new(0, 10, 0, 4)
+            label.BackgroundTransparency = 1
+            label.Text = text
+            label.TextColor3 = Color3.fromRGB(200, 200, 200)
+            label.TextSize = 12
+            label.Font = Enum.Font.Gotham
+            label.TextXAlignment = Enum.TextXAlignment.Left
+
+            local valueLabel = Instance.new("TextLabel", frame)
+            valueLabel.Size = UDim2.new(1, -20, 0, 24)
+            valueLabel.Position = UDim2.new(0, -10, 0, 4)
+            valueLabel.BackgroundTransparency = 1
+            valueLabel.Text = tostring(default or min)
+            valueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            valueLabel.TextSize = 12
+            valueLabel.Font = Enum.Font.GothamBold
+            valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+            local sliderBar = Instance.new("Frame", frame)
+            sliderBar.Size = UDim2.new(1, -20, 0, 6)
+            sliderBar.Position = UDim2.new(0, 10, 0, 34)
+            sliderBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            Instance.new("UICorner", sliderBar).CornerRadius = UDim.new(1, 0)
+
+            local sliderFill = Instance.new("Frame", sliderBar)
+            sliderFill.Size = UDim2.new(0, 0, 1, 0)
+            sliderFill.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+            Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
+
+            local sliderButton = Instance.new("TextButton", sliderBar)
+            sliderButton.Size = UDim2.new(0, 14, 0, 14)
+            sliderButton.Position = UDim2.new(0, -7, 0.5, -7)
+            sliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            sliderButton.Text = ""
+            Instance.new("UICorner", sliderButton).CornerRadius = UDim.new(1, 0)
+
+            min = min or 0
+            max = max or 100
+            default = default or min
+
+            local value = math.clamp(default, min, max)
+            local percent = (value - min) / (max - min)
+            sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+            sliderButton.Position = UDim2.new(percent, -7, 0.5, -7)
+
+            local draggingSlider = false
+
+            local function updateValue(input)
+                local pos = math.clamp((input.Position.X - sliderBar.AbsolutePosition.X) / sliderBar.AbsoluteSize.X, 0, 1)
+                value = math.floor(min + ((max - min) * pos))
+                sliderFill.Size = UDim2.new(pos, 0, 1, 0)
+                sliderButton.Position = UDim2.new(pos, -7, 0.5, -7)
+                valueLabel.Text = tostring(value)
+                pcall(function() callback(value) end)
+            end
+
+            sliderButton.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    draggingSlider = true
+                end
+            end)
+
+            sliderBar.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    draggingSlider = true
+                    updateValue(input)
+                end
+            end)
+
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    draggingSlider = false
+                end
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    updateValue(input)
+                end
+            end)
+        end
+
         function TabObj:AddDropdown(text, list, callback)
             local frame = Instance.new("Frame", scrollingFrame)
             frame.Size = UDim2.new(1, 0, 0, 36)
@@ -394,6 +483,77 @@ function Library:CreateWindow(config)
                 TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, targetSize)}):Play()
                 TweenService:Create(listHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, -16, 0, open and contentH or 0)}):Play()
                 arrow.Text = open and "▲" or "▼"
+            end)
+        end
+
+        function TabObj:AddSearchableList(text, list, callback)
+            local frame = Instance.new("Frame", scrollingFrame)
+            frame.Size = UDim2.new(1, 0, 0, 36)
+            frame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+            frame.ClipsDescendants = true
+            Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+
+            local searchBox = Instance.new("TextBox", frame)
+            searchBox.Size = UDim2.new(1, -16, 0, 28)
+            searchBox.Position = UDim2.new(0, 8, 0, 4)
+            searchBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            searchBox.Text = ""
+            searchBox.PlaceholderText = text or "Search items..."
+            searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+            searchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+            searchBox.TextSize = 12
+            searchBox.Font = Enum.Font.Gotham
+            Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 4)
+
+            local listHolder = Instance.new("ScrollingFrame", frame)
+            listHolder.Size = UDim2.new(1, -16, 0, 0)
+            listHolder.Position = UDim2.new(0, 8, 0, 36)
+            listHolder.BackgroundTransparency = 1
+            listHolder.ScrollBarThickness = 2
+
+            local listLayout = Instance.new("UIListLayout", listHolder)
+            listLayout.Padding = UDim.new(0, 4)
+
+            local function updateItems(filter)
+                for _, child in ipairs(listHolder:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child:Destroy()
+                    end
+                end
+
+                local count = 0
+                for _, v in ipairs(list or {}) do
+                    local strVal = tostring(v)
+                    if filter == "" or string.find(string.lower(strVal), string.lower(filter)) then
+                        count = count + 1
+                        local itemBtn = Instance.new("TextButton", listHolder)
+                        itemBtn.Size = UDim2.new(1, 0, 0, 26)
+                        itemBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                        itemBtn.Text = strVal
+                        itemBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+                        itemBtn.TextSize = 11
+                        itemBtn.Font = Enum.Font.Gotham
+                        Instance.new("UICorner", itemBtn).CornerRadius = UDim.new(0, 4)
+
+                        itemBtn.MouseButton1Click:Connect(function()
+                            pcall(function() callback(strVal) end)
+                        end)
+                    end
+                end
+
+                listHolder.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
+                local contentH = math.clamp(count * 30, 0, 120)
+                local targetSize = 36 + contentH + 8
+                TweenService:Create(frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, targetSize)}):Play()
+                TweenService:Create(listHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, -16, 0, contentH)}):Play()
+            end
+
+            searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+                updateItems(searchBox.Text)
+            end)
+
+            searchBox.Focused:Connect(function()
+                updateItems(searchBox.Text)
             end)
         end
 
